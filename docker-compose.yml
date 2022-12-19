@@ -1,0 +1,59 @@
+version: "3"
+services:
+    nginx:
+        container_name: "nginx"
+        build:
+            context: ./docker/nginx
+        depends_on:
+            - app
+        ports:
+            - 80:80
+        volumes:
+            - ./:/src
+
+    app:
+        container_name: "app"
+        build:
+            context: ./docker/php
+        depends_on:
+            - mysql
+        volumes:
+            - ./:/src
+            - /src/node_modules
+            - /src/vendor
+            - ./docker/php/php.ini:/usr/local/etc/php/php.ini
+
+    mysql:
+        image: mysql:8.0.28
+        platform: linux/amd64
+        command: --max_allowed_packet=32505856
+        container_name: "mysql"
+        volumes:
+            - ./docker/mysql:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=laravel_uCRM
+        ports:
+            - 3306:3306
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        platform: linux/amd64
+        container_name: "phpmyadmin"
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOST=mysql #mysqlサービス名を指定
+            - PMA_USER=root
+            - PMA_PASSWORD=root
+        links:
+            - mysql
+        ports:
+            - 4040:80
+        volumes:
+            - ./phpmyadmin/sessions:/sessions
+
+    redis:
+        image: redis:alpine
+        container_name: "redis"
+        ports:
+            - 16379:6379
