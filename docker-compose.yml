@@ -17,9 +17,11 @@ services:
             context: ./docker/php
         depends_on:
             - mysql
+        ports:
+            - 5173:5173
         volumes:
             - ./:/src
-            - /src/node_modules
+            - ./node_modules:/src/node_modules
             - /src/vendor
             - ./docker/php/php.ini:/usr/local/etc/php/php.ini
 
